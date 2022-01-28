@@ -3,7 +3,10 @@
 package lesson2.task1
 
 import lesson1.task1.discriminant
+import lesson1.task1.sqr
+import kotlin.math.abs
 import kotlin.math.max
+import kotlin.math.min
 import kotlin.math.sqrt
 
 // Урок 2: ветвления (здесь), логический тип (см. 2.2).
@@ -68,7 +71,14 @@ fun minBiRoot(a: Double, b: Double, c: Double): Double {
  * Мой возраст. Для заданного 0 < n < 200, рассматриваемого как возраст человека,
  * вернуть строку вида: «21 год», «32 года», «12 лет».
  */
-fun ageDescription(age: Int): String = TODO()
+fun ageDescription(age: Int): String =
+    when {                                      //перебор идет от 0 наверх с шагом 1? смена свича рушит логику
+        age % 100 in 11..14 -> "$age лет"
+        age % 10 == 1 -> "$age год"
+        age % 10 in 2..4 -> "$age года"
+        else -> "$age лет"
+    }
+
 
 /**
  * Простая (2 балла)
@@ -80,8 +90,37 @@ fun ageDescription(age: Int): String = TODO()
 fun timeForHalfWay(
     t1: Double, v1: Double,
     t2: Double, v2: Double,
-    t3: Double, v3: Double
-): Double = TODO()
+    t3: Double, v3: Double,
+): Double {
+
+    var sHalf: Double = (t1 * v1 + t2 * v2 + t3 * v3) / 2
+
+    var s1: Double = t1 * v1
+    var s2: Double = s1 + t2 * v2
+
+    var v1Debug: Double = v1
+    var v2Debug: Double = v2
+    var v3Debug: Double = v3
+
+    if (v1 == 0.0) {
+        v1Debug = 1.0
+    }
+
+    if (v2 == 0.0) {
+        v2Debug = 1.0
+    }
+
+    if (v3 == 0.0) {
+        v3Debug = 1.0
+    }
+
+    return if (sHalf <= s1) {
+        sHalf / v1Debug
+    } else if (sHalf <= s2) {
+        (s1 / v1Debug) + (sHalf - s1) / v2Debug
+    } else s1 / v1Debug + s2 / v2Debug + (sHalf - s2 - s1) / v3Debug
+
+}
 
 /**
  * Простая (2 балла)
@@ -95,8 +134,19 @@ fun timeForHalfWay(
 fun whichRookThreatens(
     kingX: Int, kingY: Int,
     rookX1: Int, rookY1: Int,
-    rookX2: Int, rookY2: Int
-): Int = TODO()
+    rookX2: Int, rookY2: Int,
+): Int {
+
+    return if (((kingX == rookX1) and (kingY == rookY2)) or ((kingX == rookX2) and (kingY == rookY1))) {
+        3
+    } else if (((kingX == rookX1) and (kingY != rookY2)) or ((kingX != rookX2) and (kingY == rookY1))) {
+        1
+    } else if (((kingX != rookX1) and (kingY == rookY2)) or ((kingX == rookX2) and (kingY != rookY1))) {
+        2
+    } else
+        0
+
+}
 
 /**
  * Простая (2 балла)
@@ -111,8 +161,20 @@ fun whichRookThreatens(
 fun rookOrBishopThreatens(
     kingX: Int, kingY: Int,
     rookX: Int, rookY: Int,
-    bishopX: Int, bishopY: Int
-): Int = TODO()
+    bishopX: Int, bishopY: Int,
+): Int {
+
+    var kingBishopX: Int = abs(kingX - bishopX)
+    var kingBishopY: Int = abs(kingY - bishopY)
+
+    return if (((kingX == rookX) or (kingY == rookY)) and (kingBishopX == kingBishopY)) {
+        3
+    } else if (((kingX == rookX) or (kingY == rookY)) and (kingBishopX != kingBishopY)) {
+        1
+    } else if (((kingX != rookX) or (kingY != rookY)) and (kingBishopX == kingBishopY)) {
+        2
+    } else 0
+}
 
 /**
  * Простая (2 балла)
@@ -122,7 +184,33 @@ fun rookOrBishopThreatens(
  * прямоугольным (вернуть 1) или тупоугольным (вернуть 2).
  * Если такой треугольник не существует, вернуть -1.
  */
-fun triangleKind(a: Double, b: Double, c: Double): Int = TODO()
+fun triangleKind(a: Double, b: Double, c: Double): Int {
+
+    var i: Int = 1
+
+    var maxSide = max(max(a,b),c)
+    var lessSide1 = min(min(a,b),c)
+    var lessSide2 = a + b + c - maxSide - lessSide1
+
+
+    if (maxSide < lessSide1 + lessSide2) {
+        if (sqr(maxSide) == sqr(lessSide1) + sqr(lessSide2)) {
+            i = 1
+        } else if (sqr(maxSide) < sqr(lessSide1) + sqr(lessSide2)) {
+            i = 0
+        } else if (sqr(maxSide) > sqr(lessSide1) + sqr(lessSide2)) {
+            i = 2
+        }
+    } else i = -1
+
+
+    return when (i) {
+        0 -> 0
+        1 -> 1
+        2 -> 2
+        else -> -1
+    }
+}
 
 /**
  * Средняя (3 балла)
@@ -132,4 +220,17 @@ fun triangleKind(a: Double, b: Double, c: Double): Int = TODO()
  * Найти длину пересечения отрезков AB и CD.
  * Если пересечения нет, вернуть -1.
  */
-fun segmentLength(a: Int, b: Int, c: Int, d: Int): Int = TODO()
+fun segmentLength(a: Int, b: Int, c: Int, d: Int): Int {
+
+    return if ((c in a..b) and (d !in a..b)) {
+        abs(b - c)
+    } else if ((c in a..b) and (d in a..b)) {
+        abs(c - d)
+    } else if ((a in c..d) and (b !in c..d)) {
+        abs(d - a)
+    } else if ((a in c..d) and (b in c..d)) {
+        abs(b - a)
+    } else -1
+
+}
+
