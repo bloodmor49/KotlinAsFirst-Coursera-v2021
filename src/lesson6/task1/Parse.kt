@@ -2,6 +2,10 @@
 
 package lesson6.task1
 
+import lesson2.task2.daysInMonth
+import java.util.*
+import kotlin.NoSuchElementException
+
 // Урок 6: разбор строк, исключения
 // Максимальное количество баллов = 13
 // Рекомендуемое количество баллов = 11
@@ -74,7 +78,45 @@ fun main() {
  * Обратите внимание: некорректная с точки зрения календаря дата (например, 30.02.2009) считается неверными
  * входными данными.
  */
-fun dateStrToDigit(str: String): String = TODO()
+fun dateStrToDigit(str: String): String {
+
+    var dateMap =
+        mutableMapOf("января" to 1,
+            "февраля" to 2,
+            "марта" to 3,
+            "апреля" to 4,
+            "мая" to 5,
+            "июня" to 6,
+            "июля" to 7,
+            "августа" to 8,
+            "сентября" to 9,
+            "октября" to 10,
+            "ноября" to 11,
+            "декабря" to 12)
+
+    var dateSum = str.split(" ") as MutableList //список из трех значений
+
+    try {
+        var date = dateSum[0].toInt()
+        var month = dateMap[dateSum[1]]
+        var year = dateSum[2].toInt()
+
+        return when {
+            date > daysInMonth(month!!, year) -> String()
+            else -> String.format("%02d.%02d.%02d", date, month, year)
+        }
+
+    } catch (e: Exception) {
+        when (e) {
+            is NumberFormatException,
+            is IndexOutOfBoundsException,
+            is NullPointerException,
+            -> return (String())
+            else -> throw e
+        }
+
+    }
+}
 
 /**
  * Средняя (4 балла)
@@ -86,7 +128,54 @@ fun dateStrToDigit(str: String): String = TODO()
  * Обратите внимание: некорректная с точки зрения календаря дата (например, 30 февраля 2009) считается неверными
  * входными данными.
  */
-fun dateDigitToStr(digital: String): String = TODO()
+fun dateDigitToStr(digital: String): String {
+
+    var dateMap =
+        mutableMapOf("января" to 1,
+            "февраля" to 2,
+            "марта" to 3,
+            "апреля" to 4,
+            "мая" to 5,
+            "июня" to 6,
+            "июля" to 7,
+            "августа" to 8,
+            "сентября" to 9,
+            "октября" to 10,
+            "ноября" to 11,
+            "декабря" to 12)
+
+
+    var dateSum = digital.split(".") as MutableList //список из трех значений
+
+    try {
+
+        var date = dateSum[0].toInt()
+        var month = dateSum[1].toInt()
+        var year = dateSum[2].toInt()
+
+        return when {
+            date > daysInMonth(month, year) -> String()
+            dateSum.size != 3 -> String()
+            else -> {
+                for ((key, value) in dateMap) if (month == value) {
+                    dateSum[1] = key
+                }
+                "$date ${dateSum[1]} $year"
+            }
+
+        }
+
+    } catch (e: Exception) {
+        when (e) {
+            is NumberFormatException,
+            is IndexOutOfBoundsException,
+            is NullPointerException,
+            -> return (String())
+            else -> throw e
+        }
+
+    }
+}
 
 /**
  * Средняя (4 балла)
@@ -102,7 +191,26 @@ fun dateDigitToStr(digital: String): String = TODO()
  *
  * PS: Дополнительные примеры работы функции можно посмотреть в соответствующих тестах.
  */
-fun flattenPhoneNumber(phone: String): String = TODO()
+fun flattenPhoneNumber(phone: String): String {
+
+    try {
+        var number = phone.map { it.toString() }
+        var string = ""
+
+        if (phone.contains(Regex("""(\(\))|[a-zA-Z]|(\w+\+)|[~!@#${'$'}^?&*]|\]|\["""))) return ""
+
+        for (i in number.indices) {
+            when {
+                number[i].contains(Regex("""\d|\+""")) ->
+                    string = string.plus(number[i])
+            }
+        }
+        return string
+
+    } catch (e: NullPointerException) {
+        return ""
+    }
+}
 
 /**
  * Средняя (5 баллов)
@@ -114,7 +222,26 @@ fun flattenPhoneNumber(phone: String): String = TODO()
  * Прочитать строку и вернуть максимальное присутствующее в ней число (717 в примере).
  * При нарушении формата входной строки или при отсутствии в ней чисел, вернуть -1.
  */
-fun bestLongJump(jumps: String): Int = TODO()
+fun bestLongJump(jumps: String): Int {
+
+    try {
+        var results = mutableSetOf<Int>()
+
+        if (jumps.contains(Regex("""[~!@#${'$'}^&*+]"""))) return -1
+
+        var match = Regex("""\d{3}""").findAll(jumps)
+        for (i in match) results.add(i.value.toInt())
+        return results.maxOf { it }
+
+    } catch (e: Exception) {
+        when (e) {
+            is NoSuchElementException,
+            is NullPointerException,
+            -> return -1
+            else -> throw e
+        }
+    }
+}
 
 /**
  * Сложная (6 баллов)
@@ -127,7 +254,26 @@ fun bestLongJump(jumps: String): Int = TODO()
  * При нарушении формата входной строки, а также в случае отсутствия удачных попыток,
  * вернуть -1.
  */
-fun bestHighJump(jumps: String): Int = TODO()
+fun bestHighJump(jumps: String): Int {
+
+    try {
+        var results = mutableSetOf<String>()
+
+        if (jumps.contains(Regex("""[~!@#${'$'}^&*]"""))) return -1
+
+        var match = Regex("""\d{3}\s\+""").findAll(jumps)
+        for (i in match) results.add(i.value.removeRange(i.value.lastIndex - 1, i.value.lastIndex + 1))
+        return results.maxOf { it.toInt() }
+
+    } catch (e: Exception) {
+        when (e) {
+            is NoSuchElementException,
+            is NullPointerException,
+            -> return -1
+            else -> throw e
+        }
+    }
+}
 
 /**
  * Сложная (6 баллов)
@@ -138,7 +284,23 @@ fun bestHighJump(jumps: String): Int = TODO()
  * Вернуть значение выражения (6 для примера).
  * Про нарушении формата входной строки бросить исключение IllegalArgumentException
  */
-fun plusMinus(expression: String): Int = TODO()
+fun plusMinus(expression: String): Int {
+
+    if (Regex("""(^[+-])|(\d\s\d)|([+-]\s[+-])|([+-]$)|^(\s\+\-)""").find(expression) != null)
+        throw IllegalArgumentException()
+
+    var numbers = expression.split(" ").toMutableList()
+    var result = numbers[0].toInt()
+
+    for (number in numbers.indices)
+        when {
+            number == 0 -> result = numbers[0].toInt()
+            numbers[number - 1].contains("-") -> result += numbers[number].toInt() * (-1)
+            numbers[number - 1].contains("+") -> result += numbers[number].toInt()
+        }
+    return result
+
+}
 
 /**
  * Сложная (6 баллов)
@@ -149,7 +311,19 @@ fun plusMinus(expression: String): Int = TODO()
  * Вернуть индекс начала первого повторяющегося слова, или -1, если повторов нет.
  * Пример: "Он пошёл в в школу" => результат 9 (индекс первого 'в')
  */
-fun firstDuplicateIndex(str: String): Int = TODO()
+fun firstDuplicateIndex(str: String): Int {
+
+    val text = str.lowercase(Locale.getDefault()).split(" ")
+    var index = 0
+
+    if (text.size == 1) return -1
+
+    for (i in 1 until text.size) {
+        if (text[i - 1] == text[i]) return index
+        else index += text[i - 1].length + 1
+    }
+    return -1
+}
 
 /**
  * Сложная (6 баллов)
@@ -162,7 +336,26 @@ fun firstDuplicateIndex(str: String): Int = TODO()
  * или пустую строку при нарушении формата строки.
  * Все цены должны быть больше нуля либо равны нулю.
  */
-fun mostExpensive(description: String): String = TODO()
+fun mostExpensive(description: String): String {
+
+    if (description == "") return ""
+
+    var mapOfGoods = mutableMapOf<String, Double>()
+    var string = Regex("""(\;\s)""").split(description)
+    var pairOfGood = mutableListOf<String>()
+
+    return try {
+        for (word in string) {
+            pairOfGood = word.split(" ") as MutableList<String>
+            mapOfGoods[pairOfGood.first()] = pairOfGood.last().toDouble()
+        }
+        var max = mapOfGoods.maxWithOrNull(Comparator { x, y -> x.value.compareTo(y.value) })
+
+        max!!.key
+    } catch (e: NumberFormatException) {
+        ""
+    }
+}
 
 /**
  * Сложная (6 баллов)

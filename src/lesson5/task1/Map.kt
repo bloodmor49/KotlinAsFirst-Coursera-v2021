@@ -2,6 +2,11 @@
 
 package lesson5.task1
 
+//import ru.spbstu.kotlin.typeclass.classes.Monoid.Companion.plus
+import ru.spbstu.wheels.sorted
+import java.util.*
+import kotlin.math.max
+
 // Урок 5: ассоциативные массивы и множества
 // Максимальное количество баллов = 14
 // Рекомендуемое количество баллов = 9
@@ -16,7 +21,7 @@ package lesson5.task1
  */
 fun shoppingListCost(
     shoppingList: List<String>,
-    costs: Map<String, Double>
+    costs: Map<String, Double>,
 ): Double {
     var totalCost = 0.0
 
@@ -38,7 +43,7 @@ fun shoppingListCost(
  */
 fun filterByCountryCode(
     phoneBook: MutableMap<String, String>,
-    countryCode: String
+    countryCode: String,
 ) {
     val namesToRemove = mutableListOf<String>()
 
@@ -61,7 +66,7 @@ fun filterByCountryCode(
  */
 fun removeFillerWords(
     text: List<String>,
-    vararg fillerWords: String
+    vararg fillerWords: String,
 ): List<String> {
     val fillerWordSet = setOf(*fillerWords)
 
@@ -96,7 +101,20 @@ fun buildWordSet(text: List<String>): MutableSet<String> {
  *   buildGrades(mapOf("Марат" to 3, "Семён" to 5, "Михаил" to 5))
  *     -> mapOf(5 to listOf("Семён", "Михаил"), 3 to listOf("Марат"))
  */
-fun buildGrades(grades: Map<String, Int>): Map<Int, List<String>> = TODO()
+fun buildGrades(grades: Map<String, Int>): Map<Int, List<String>> {
+
+    var result = mutableMapOf<Int, List<String>>()
+
+    //создаем оценку и присваеваем ей человека.
+    //если оценка и человек есть, то добавляем в список еще человека. Если же нет (нуль), то создаем снуля через put
+
+    for ((name, grade) in grades)
+        if (result[grade] != null) result[grade] = result[grade]!!.plus(listOf(name))
+        else result[grade] = listOf(name)
+
+    return result
+
+}
 
 /**
  * Простая (2 балла)
@@ -108,7 +126,13 @@ fun buildGrades(grades: Map<String, Int>): Map<Int, List<String>> = TODO()
  *   containsIn(mapOf("a" to "z"), mapOf("a" to "z", "b" to "sweet")) -> true
  *   containsIn(mapOf("a" to "z"), mapOf("a" to "zee", "b" to "sweet")) -> false
  */
-fun containsIn(a: Map<String, String>, b: Map<String, String>): Boolean = TODO()
+fun containsIn(a: Map<String, String>, b: Map<String, String>): Boolean {
+
+    //если ключ есть и там, и там, то сравниваем значения и выдаем ответ
+
+    for ((key, value) in a) if (value != b[key]) return false
+    return true
+}
 
 /**
  * Простая (2 балла)
@@ -125,7 +149,19 @@ fun containsIn(a: Map<String, String>, b: Map<String, String>): Boolean = TODO()
  *     -> a changes to mutableMapOf() aka becomes empty
  */
 fun subtractOf(a: MutableMap<String, String>, b: Map<String, String>) {
-    TODO()
+
+    //аналог примера с телефонной книгой.
+    //удалить при пересчете также не получилось - пришлось выполнять в два  через список удаляемых слов
+
+    var removeList = mutableListOf<String>()
+
+    for ((key, value) in b)
+        if (a[key] == b[key]) removeList.add(key)
+
+    for (i in removeList) {
+        a.remove(i)
+    }
+
 }
 
 /**
@@ -135,7 +171,35 @@ fun subtractOf(a: MutableMap<String, String>, b: Map<String, String>) {
  * В выходном списке не должно быть повторяющихся элементов,
  * т. е. whoAreInBoth(listOf("Марат", "Семён, "Марат"), listOf("Марат", "Марат")) == listOf("Марат")
  */
-fun whoAreInBoth(a: List<String>, b: List<String>): List<String> = TODO()
+fun whoAreInBoth(a: List<String>, b: List<String>): List<String> {
+
+    //решение в три шага. скорее всего есть проще.
+    //1) суммируем листы в один общий
+    //2) закидываем все в массив. если повторяется, то  индекс меняется
+    //3) закидываем все в индекс повторений обратно в лист, предварительно отчистив его
+
+    /*
+    var counterMap = mutableMapOf<String, Int>()
+    var resultList = a.plus(b).toMutableList()
+
+
+    for (i in resultList.indices) {
+        if (counterMap[resultList[i]] != null) counterMap[resultList[i]] = 2
+        else counterMap[resultList[i]] = 1
+    }
+
+    resultList.clear()
+
+    for ((key, value) in counterMap)
+        if (value == 2) resultList.add(key)
+
+    return resultList
+*/
+
+    //НОООООООО, если в спсках имена не повторяются, то можно решить в одно действие через множества.
+
+    return a.toSet().intersect(b.toSet()).toList()
+}
 
 /**
  * Средняя (3 балла)
@@ -154,7 +218,19 @@ fun whoAreInBoth(a: List<String>, b: List<String>): List<String> = TODO()
  *     mapOf("Emergency" to "911", "Police" to "02")
  *   ) -> mapOf("Emergency" to "112, 911", "Police" to "02")
  */
-fun mergePhoneBooks(mapA: Map<String, String>, mapB: Map<String, String>): Map<String, String> = TODO()
+fun mergePhoneBooks(mapA: Map<String, String>, mapB: Map<String, String>): Map<String, String> {
+
+    //Проверяем если существует, то добавляем что нужно
+
+    var mapResult = mapB.toMutableMap()
+
+    for ((key, value) in mapA)
+        if (mapB[key] == null) mapResult[key] = value
+        else if (mapB[key] != mapA[key] && mapB[key] != null)
+            mapResult[key] = mapA[key]!!.plus(", " + mapResult[key])
+
+    return mapResult
+}
 
 /**
  * Средняя (4 балла)
@@ -166,7 +242,28 @@ fun mergePhoneBooks(mapA: Map<String, String>, mapB: Map<String, String>): Map<S
  *   averageStockPrice(listOf("MSFT" to 100.0, "MSFT" to 200.0, "NFLX" to 40.0))
  *     -> mapOf("MSFT" to 150.0, "NFLX" to 40.0)
  */
-fun averageStockPrice(stockPrices: List<Pair<String, Double>>): Map<String, Double> = TODO()
+fun averageStockPrice(stockPrices: List<Pair<String, Double>>): Map<String, Double> {
+
+    //Сомневаюсь в решении, но пока идей нет. Создаем два массива с одинаковыми ключами, но в первом
+    //значение ключа - числитель от среднего, а во втором - это сумма элементов. В результате мы их делим друг на друга.
+
+
+    var resultMap = mutableMapOf<String, Double>()
+    var divinerMap = mutableMapOf<String, Double>()
+
+    for (i in stockPrices.indices)
+        if (stockPrices[i].first in resultMap) {
+            resultMap[stockPrices[i].first] = (resultMap[stockPrices[i].first]!! + stockPrices[i].second)
+            divinerMap[stockPrices[i].first] = divinerMap[stockPrices[i].first]!! + 1.0
+        } else {
+            resultMap += stockPrices[i]
+            divinerMap[stockPrices[i].first] = 1.0
+        }
+
+    for ((key, value) in resultMap) resultMap[key] = resultMap[key]!!.div(divinerMap[key]!!)
+
+    return resultMap
+}
 
 /**
  * Средняя (4 балла)
@@ -194,7 +291,23 @@ fun findCheapestStuff(stuff: Map<String, Pair<String, Double>>, kind: String): S
  * Например:
  *   canBuildFrom(listOf('a', 'b', 'o'), "baobab") -> true
  */
-fun canBuildFrom(chars: List<Char>, word: String): Boolean = TODO()
+fun canBuildFrom(chars: List<Char>, word: String): Boolean {
+
+    var listOfWord = word.lowercase(Locale.getDefault()).toSet()
+    var listOfChar = chars.toString().lowercase(Locale.getDefault()).toSet()
+
+
+    // очень тупое решение, но рабочее. преобразуя объект в множество, мы автоматически убиваем дублирование
+    // далее проводим пересечение множеств. так как все буквы в единственном экземляре, то пересечение = количеству букв
+    // в конечном слове. иначе чего - то не хватает. иначе чего - то слишком много.
+
+    if (word.isNotEmpty())
+        if (listOfChar.intersect(listOfWord).size == listOfWord.size) return true
+
+    return false
+
+}
+
 
 /**
  * Средняя (4 балла)
@@ -208,7 +321,18 @@ fun canBuildFrom(chars: List<Char>, word: String): Boolean = TODO()
  * Например:
  *   extractRepeats(listOf("a", "b", "a")) -> mapOf("a" to 2)
  */
-fun extractRepeats(list: List<String>): Map<String, Int> = TODO()
+fun extractRepeats(list: List<String>): Map<String, Int> {
+
+    // создаем суммарный список значений от цифр, а потом выдаем в ответ только тот, у которого value > 1
+
+    var resultMap = mutableMapOf<String, Int>()
+
+    for (i in list.indices)
+        if (list[i] !in resultMap.keys) resultMap[list[i]] = 1
+        else resultMap[list[i]] = resultMap[list[i]]!! + 1
+
+    return resultMap.filterValues { it > 1 }
+}
 
 /**
  * Средняя (3 балла)
@@ -222,7 +346,19 @@ fun extractRepeats(list: List<String>): Map<String, Int> = TODO()
  * Например:
  *   hasAnagrams(listOf("тор", "свет", "рот")) -> true
  */
-fun hasAnagrams(words: List<String>): Boolean = TODO()
+fun hasAnagrams(words: List<String>): Boolean {
+
+    // сравниваем отсортированный по алфавиту лист из чаров слова с существующим таковым в массиве
+    // если уже такой есть, то выводим тру, если же нет - добавляем в массив
+
+    var resultMap = mutableMapOf<String, List<Char>>()
+
+    for (i in words.indices)
+        if (words[i].toCharArray().toMutableList().sorted() !in resultMap.values) resultMap[words[i]] =
+            words[i].toCharArray().toMutableList().sorted()
+        else return true
+    return false
+}
 
 /**
  * Сложная (5 баллов)
@@ -258,7 +394,52 @@ fun hasAnagrams(words: List<String>): Boolean = TODO()
  *          "GoodGnome" to setOf()
  *        )
  */
-fun propagateHandshakes(friends: Map<String, Set<String>>): Map<String, Set<String>> = TODO()
+fun propagateHandshakes(friends: Map<String, Set<String>>): Map<String, Set<String>> {
+
+    var resultMap = mutableMapOf<String, Set<String>>()
+    var personSet = setOf<String>()
+    var personMap = mutableMapOf<String, Set<String>>()
+
+    //Сначала создаем полный список со всеми людьми и заполняем известными знакомствами
+
+    for ((key, value) in friends) personSet = personSet.plus(value).plus(key)
+    for (i in personSet) resultMap[i] = setOf()
+    resultMap.plusAssign(friends)
+
+    //Потом для каждого человека перебираем всех его знакомых
+
+    for ((key) in resultMap) {
+        personMap[key] = enumPerson(key, resultMap)
+    }
+
+    return personMap
+
+}
+
+/**
+ *  Функция пересчёта количества рукопожатий для одного конкретного человека.
+ *  на вход задается человек и общий список людей и знакомств
+ *  на выходе получаем строку со всеми знакомствами для человека
+ */
+fun enumPerson(person: String, inputMap: Map<String, Set<String>>): Set<String> {
+
+    var resultSet = inputMap[person]
+    var delMap = inputMap.minus(person)
+
+    if (resultSet == null) return setOf()
+    else
+        while (delMap.keys.toSet().intersect(resultSet!!).isNotEmpty()) {
+            for (i in resultSet!!) {
+                if (i in delMap.keys) {
+                    resultSet = resultSet.union(delMap[i]!!.toSet())
+                    delMap = delMap.minus(i)
+                }
+            }
+        }
+
+    return resultSet.minus(person)
+
+}
 
 /**
  * Сложная (6 баллов)
@@ -277,7 +458,14 @@ fun propagateHandshakes(friends: Map<String, Set<String>>): Map<String, Set<Stri
  *   findSumOfTwo(listOf(1, 2, 3), 4) -> Pair(0, 2)
  *   findSumOfTwo(listOf(1, 2, 3), 6) -> Pair(-1, -1)
  */
-fun findSumOfTwo(list: List<Int>, number: Int): Pair<Int, Int> = TODO()
+fun findSumOfTwo(list: List<Int>, number: Int): Pair<Int, Int> {
+
+    for (i in list.indices) if ((number - list[i]) in list.minus(list[i]))
+        return Pair(i, list.indexOf(number - list[i])).sorted()
+
+    return Pair(-1, -1)
+
+}
 
 /**
  * Очень сложная (8 баллов)
@@ -300,4 +488,41 @@ fun findSumOfTwo(list: List<Int>, number: Int): Pair<Int, Int> = TODO()
  *     450
  *   ) -> emptySet()
  */
-fun bagPacking(treasures: Map<String, Pair<Int, Int>>, capacity: Int): Set<String> = TODO()
+fun bagPacking(treasures: Map<String, Pair<Int, Int>>, capacity: Int): Set<String> {
+
+    val result = mutableSetOf<String>()
+    val listOfMass = mutableListOf<Int>()
+    val listOfPrices = mutableListOf<Int>()
+    val listOfTreasures = mutableListOf<String>()
+    val prices = Array(treasures.size + 1) { Array(capacity + 1) { 0 } }
+    for ((key, value) in treasures) {
+        listOfPrices.add(value.second)
+        listOfMass.add(value.first)
+        listOfTreasures.add(key)
+    }
+    for (i in 1..treasures.size)
+        for (j in 0..capacity)
+            if (j >= listOfMass[i - 1])
+                prices[i][j] = max(prices[i - 1][j], prices[i - 1][j - listOfMass[i - 1]] + listOfPrices[i - 1])
+            else
+                prices[i][j] = prices[i - 1][j]
+    var temp = capacity
+    var i = treasures.size
+    while (i > 0) {
+        if (prices[i][temp] != prices[i - 1][temp]) {
+            result.add(listOfTreasures[i - 1])
+            temp -= listOfMass[i - 1]
+        }
+        i--
+    }
+    return result
+
+}
+
+
+fun main() {
+    bagPacking(
+        mapOf("Кубок" to (500 to 2000), "Слиток" to (1000 to 5000), "Кирпич" to (100 to 300)),
+        1200
+    )
+}
